@@ -26,3 +26,80 @@ class CityGrid:
     def print_grid(self):
         for row in self.grid:
             print(row)
+
+Task 2: Tower Coverage
+Each tower has a fixed range R (in blocks) within which it provides coverage. This coverage is a square, with the tower in the center.
+Implement a method in the CityGrid class to place a tower and visualize its coverage.
+
+class CityGrid:
+    def __init__(self, size):
+        self.size = size
+        self.grid = [[0] * size for _ in range(size)] # инициализация сетки с размером size
+
+    def place_tower(self, x, y, range):
+        for i in range(self.size):  # обход всех клеток сетки
+            for j in range(self.size):
+                if abs(x-i) <= range and abs(y-j) <= range: # проверка, что клетка находится в диапазоне покрытия башни
+                    self.grid[i][j] = 1 # помечаем клетку как покрытую
+
+    def visualize_coverage(self):
+        for i in range(self.size):  # обход всех клеток сетки
+            for j in range(self.size):
+                if self.grid[i][j] == 1:
+                    print('X', end='') # покрытая клетка
+                else:
+                    print('.', end='') # непокрытая клетка
+            print() # переход на новую строку
+
+Task 3: Optimization Problem
+Design an algorithm to place the minimum number of towers such that all of non-obstructed blocks are within the coverage of at least one tower. The algorithm cannot place towers on obstructed blocks.
+Implement a method in the CityGrid class to display the placement of towers.
+class CityGrid:
+    def __init__(self, city_map):
+        self.city_map = city_map
+        self.grid = self.create_grid()
+
+    def create_grid(self):
+        grid = []
+        for row in self.city_map:
+            grid.append([False]*len(row))
+        return grid
+
+    def mark_blocked_blocks(self):
+        for i in range(len(self.city_map)):
+            for j in range(len(self.city_map[i])):
+                if self.city_map[i][j] == 'B':
+                    self.grid[i][j] = True
+
+    def place_towers(self):
+        self.mark_blocked_blocks()
+        uncovered_blocks = self.get_uncovered_blocks()
+        while uncovered_blocks:
+            block = uncovered_blocks.pop()
+            if not self.grid[block[0]][block[1]]:
+                self.grid[block[0]][block[1]] = True
+                self.mark_covered_blocks(block)
+                uncovered_blocks = self.get_uncovered_blocks()
+
+    def get_uncovered_blocks(self):
+        uncovered_blocks = []
+        for i in range(len(self.city_map)):
+            for j in range(len(self.city_map[i])):
+                if self.city_map[i][j] == 'U' and not self.grid[i][j]:
+                    uncovered_blocks.append((i, j))
+        return uncovered_blocks
+
+    def mark_covered_blocks(self, block):
+        for i in range(len(self.city_map)):
+            for j in range(len(self.city_map[i])):
+                if self.city_map[i][j] == 'U' and (abs(i - block[0]) <= 1 or abs(j - block[1]) <= 1):
+                    self.grid[i][j] = True
+
+    def display_tower_placement(self):
+        for i in range(len(self.city_map)):
+            for j in range(len(self.city_map[i])):
+                if self.grid[i][j]:
+                    print('T', end=' ')
+                else:
+                    print(self.city_map[i][j], end=' ')
+            print()
